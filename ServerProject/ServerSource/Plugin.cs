@@ -4,32 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Barotrauma;
-using HarmonyLib;
+using Barotrauma.Networking;
 
 namespace MyModName
 {
     public partial class Plugin : IAssemblyPlugin
     {
-        luac
-    }
-    public static class Patcher
-    {
-        public static void DoPatching()
+        static void InitCommands()
         {
-            var harmony = new Harmony("com.aptitude.baro");
-            harmony.PatchAll();
-
+            GameMain.LuaCs.Game.AddCommand("BGM_clientlist", "For Barotrauma Management GUI use only.", (_) =>
+            {
+                var playerArr = new List<string>();
+                foreach (Client c in GameMain.Server.ConnectedClients)
+                {
+                    playerArr.Add($"{{{c.SessionId} {c.Name}{(c.Character != null ? " playing " + c.Character.LogName : "")}, {c.Connection.Endpoint.StringRepresentation}, {c.Connection.AccountInfo.AccountId}}}");
+                }
+            });
         }
     }
-    [HarmonyPatch(typeof(Barotrauma.DebugConsole.Command))]
-    [HarmonyPatch(nameof(Barotrauma.DebugConsole.Command))]
-    static class Patch
-    {
-        [HarmonyPostfix]
-        static void NewCommands()
-        {
-            var meth = Traverse.Create<Command>().Method("InitProjectSpecific").GetValue();
-            meth.commands.add
-        }
-    }
-}
+}  
+  
